@@ -10,14 +10,15 @@ name = "cart-line-message"
 handle = "cart-line-message"
 type = "ui_extension"
 
+    [[extensions.targeting]]
+    module = "./src/Checkout.tsx"
+    target = "purchase.checkout.cart-line-item.render-after"
 
-# Controls where in Shopify your extension will be injected,
-# and the file that contains your extension's source code. Learn more:
-# https://shopify.dev/docs/api/checkout-ui-extensions/unstable/extension-targets-overview
-
-[[extensions.targeting]]
-module = "./src/Checkout.tsx"
-target = "purchase.checkout.cart-line-item.render-after"
+        [[extensions.targeting.metafields]]
+        namespace = "custom"
+        key = "shipping_message"
+        type = "single_line_text_field"
+        description = "Indicate a delay on the shipping"
 
 [extensions.capabilities]
 # Gives your extension access to directly query Shopify's storefront API.
@@ -33,8 +34,3 @@ api_access = true
 # products, customers, and more. Learn more:
 # https://shopify.dev/docs/api/checkout-ui-extensions/unstable/configuration#metafields
 
-[[extensions.metafields]]
-namespace = "custom"
-key = "shipping_message"
-type = "single_line_text_field"
-description = "Indicate a delay on the shipping"

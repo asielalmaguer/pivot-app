@@ -2,10 +2,8 @@ import {
   reactExtension,
   Text,
   useCartLineTarget,
-  useApi,
-  BlockStack,
+  useAppMetafields,
 } from "@shopify/ui-extensions-react/checkout";
-import { useEffect, useState } from "react";
 
 export default reactExtension(
   "purchase.checkout.cart-line-item.render-after",
@@ -14,58 +12,30 @@ export default reactExtension(
 
 function ItemMessageExtension() {
   const cartLine = useCartLineTarget();
-  const { query } = useApi();
-  const [message, setMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!cartLine) return;
+  if (!cartLine) {
+    return null;
+  }
 
-    const productId = cartLine?.merchandise?.product?.id;
+  const energyRating = useAppMetafields();
 
-    async function fetchMetafield() {
-      const response = await query(
-        `query GetProductMetafields($ids: [ID!]!) {
-          nodes(ids: $ids) {
-            ... on Product {
-              id
-              metafields(first: 10, namespace: "custom") {
-                edges {
-                  node {
-                    key
-                    value
-                  }
-                }
-              }
-            }
-          }
-        }`,
-        {
-          variables: {
-            ids: [productId],
-          },
-        }
+  const shippingMessage = energyRating
+    .filter((item) => {
+      const productId = cartLine.merchandise.product.id.replace(
+        "gid://shopify/Product/",
+        ""
       );
+      return item.metafield && item.target.id === productId;
+    })
+    .map((item) => item.metafield.value)[0];
 
-      const productNode = response?.data?.nodes?.[0];
-      const metafieldEdge = productNode?.metafields?.edges?.find(
-        (edge: any) => edge.node.key === "shipping_message"
-      );
+  console.log("Shipping message:", shippingMessage);
 
-      if (metafieldEdge) {
-        setMessage(metafieldEdge.node.value);
-      }
-    }
-
-    fetchMetafield();
-  }, [cartLine]);
-
-  if (!message) return null;
+  if (!shippingMessage) return null;
 
   return (
-    <BlockStack spacing="none">
-      <Text size="small" appearance="subdued">
-        {message}
-      </Text>
-    </BlockStack>
+    <Text size="small" appearance="subdued">
+      {shippingMessage}
+    </Text>
   );
 }
