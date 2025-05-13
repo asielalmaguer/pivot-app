@@ -12,6 +12,22 @@ What I was planning to do instead was use the product ID to make a Storefront AP
 get the metafields from there, and then show the message
 (from the metafield with namespace custom and key shipping_message) under the product in the checkout.
 
+UPDATE:
+
+Yesterday, my initial approach was to use the Storefront API to fetch the metafields based on the product ID, since useCartLineTarget() doesn’t expose product metafields directly. However, I opted for a different solution: I used useAppMetafields() to load the relevant metafields that i needed and filtered them by product ID to retrieve the appropriate value for each cart line item. While this may not be the most optimized solution in terms of data loading, it avoids additional API calls and worked effectively for this use case.
+
+TO get that i used this configuration on my shopify.extension.toml file
+
+[[extensions.targeting]]
+module = "./src/Checkout.tsx"
+target = "purchase.checkout.cart-line-item.render-after"
+
+[[extensions.targeting.metafields]]
+namespace = "custom"
+key = "shipping_message"
+type = "single_line_text_field"
+description = "Indicate a delay on the shipping"
+
 ####################################################
 Checkout UI extensions let app developers build custom functionality that merchants can install at defined targets in the checkout flow. You can learn more about checkout UI extensions in Shopify’s [developer documentation](https://shopify.dev/api/checkout-extensions/checkout).
 
